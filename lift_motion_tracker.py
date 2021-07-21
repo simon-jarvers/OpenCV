@@ -4,6 +4,11 @@ import numpy as np
 file_path = "venv/Resources/deadlift.mp4"
 cap = cv2.VideoCapture(file_path)
 
+save_width = int(cap.get(3))
+save_height = int(cap.get(4))
+save_size = (save_width, save_height)
+save_video = cv2.VideoWriter('venv/Resources/tracked_deadlift.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30, save_size)
+
 tracker = cv2.legacy_TrackerMOSSE.create()
 # tracker = cv2.legacy_TrackerCSRT.create()
 success, img = cap.read()
@@ -43,6 +48,7 @@ while True:
             tracked_points.append([x, y])
             draw_tracked_points(tracked_points)
             print(x, y)
+            save_video.write(vid)
 
         else:
             cv2.putText(vid, "Lost", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
