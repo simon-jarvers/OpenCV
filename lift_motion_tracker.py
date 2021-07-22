@@ -1,18 +1,21 @@
 import cv2
 import numpy as np
 
-file_path = "venv/Resources/deadlift2.mp4"
+file_name = "deadlift4"
+
+file_path = "venv/Resources/" + file_name + ".mp4"
 cap = cv2.VideoCapture(file_path)
 
 frame_width = int(cap.get(3))
 frame_height = int(cap.get(4))
 save_size = (frame_width, frame_height)
-save_video = cv2.VideoWriter('venv/Resources/tracked_deadlift2.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30, save_size)
+# save_video = cv2.VideoWriter('venv/Resources/tracked_deadlift1.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30, save_size)
+save_video = cv2.VideoWriter("venv/Resources/tracked_" + file_name + ".mp4", cv2.VideoWriter_fourcc(*'mp4v'), 30, save_size)
 
 tracker = cv2.legacy_TrackerMOSSE.create()
 # tracker = cv2.legacy_TrackerCSRT.create()
-success, img = cap.read()
-bbox = cv2.selectROI("Deadlift", img, False)
+success, img = cap.read()  # read the first image for bbox
+bbox = cv2.selectROI("Deadlift", img, False)  # get bbox from user input
 tracker.init(img, bbox)
 
 tracked_points = []
@@ -21,7 +24,7 @@ current_lift = 0
 
 
 def draw_tracked_points(vid, tracked_points):
-    if len(tracked_points) < 5:
+    if len(tracked_points) < 1:
         return
     else:
         for point in tracked_points:
@@ -123,9 +126,12 @@ while True:
 # success, img = cap.read()
 draw_tracked_points(img, tracked_points)
 # cv2.rectangle(img, (10, 10), (250, frame_height - 10), (255, 255, 255), cv2.FILLED)
+temp_tracked_lifts = []
 for tracked_lift in tracked_lifts:
-    if len(tracked_lift) < 3:
-        tracked_lifts.remove(tracked_lift)
+    if len(tracked_lift) > 10:
+        temp_tracked_lifts.append(tracked_lift)
+tracked_lifts = temp_tracked_lifts
+del temp_tracked_lifts
 cv2.rectangle(img, (10, 10), (250, 30*len(tracked_lifts) + 25), (255, 255, 255), cv2.FILLED)
 for i, tracked_lift in enumerate(tracked_lifts):
     score = lift_score(tracked_lift)
